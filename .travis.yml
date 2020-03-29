@@ -1,0 +1,23 @@
+language:
+  - python
+
+python:
+  - "3.7"
+
+services:
+  - postgresql
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - psql -c 'create database welfare_db_test;' -U postgres
+  - python manage.py migrate
+
+script:
+  - coverage run manage.py test
+  - coverage report
+
+after_success:
+  - coverallslanguage: python
+  - coveralls
