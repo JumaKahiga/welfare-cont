@@ -1,0 +1,15 @@
+[run]
+include = 
+  *dependants/*
+  *funds/*
+  *members/*
+omit =
+  *migrations*
+  *tests*
+  manage.py
+  *settings*
+
+branch = True
+
+[report]
+show_missing = True

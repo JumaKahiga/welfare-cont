@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 
 import cloudinary
+import django_heroku
 
 from dotenv import load_dotenv
 
@@ -139,3 +140,7 @@ cloudinary.config(
     api_key=os.environ['CLOUDINARY_API_KEY'],
     api_secret=os.environ['CLOUDINARY_API_SECRET']
 )
+
+# activate django_heroku
+django_heroku.settings(locals())
+
