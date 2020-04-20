@@ -31,19 +31,24 @@ class Contribution(models.Model):
     amount = models.PositiveIntegerField(default=250)
     payment_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
+    objects = models.Manager()
 
     def save(self, *args, **kwargs):
         self.clean_fields()
         super().save(*args, **kwargs)
 
-    def total_funds_contributed(self):
-        return self.objects.aggregate(models.Sum('amount'))
+    def total_contribution(self):
+        return Contribution.objects.aggregate(models.Sum('amount'))
 
     def available_funds(self):
-        collected = self.objects.aggregate(models.Sum('amount'))
+        collected = self.total_contribution()
         disbursed = Disbursement.objects.aggregate(models.Sum('amount'))
 
-        return (collected - disbursed)
+        return (collected.get(
+            'amount__sum', 0) - disbursed.get('amount__sum', 0))
+
+    def __str__(self):
+        return f'{self.month}: {self.amount}'
 
 
 class Disbursement(models.Model):
@@ -75,4 +80,4 @@ class Disbursement(models.Model):
                 'Disbursements can only be done for active members') # noqa
 
     def total_funds_disbursed(self):
-        return self.objects.aggregate(models.Sum('amount'))
+        return Disbursement.objects.aggregate(models.Sum('amount'))
