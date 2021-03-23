@@ -1,9 +1,7 @@
 from rest_framework import generics
 
-
 from members.models import Member
-from members.serializers import (
-    MemberSerializer, MembersSerializer)
+from members.serializers import (MemberSerializer, MembersSerializer)
 
 
 class MembersListAPIView(generics.ListAPIView):

@@ -1,7 +1,7 @@
 from django.urls import path
 
-from members.views import (
-    MembersListAPIView, MemberCreateAPIView, MemberUpdateAPIView)
+from members.views import (MembersListAPIView, MemberCreateAPIView,
+                           MemberUpdateAPIView)
 
 app_name = 'members'
 

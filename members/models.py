@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -29,8 +31,19 @@ class Member(Person):
 
     @property
     def total_contributions(self):
-        _total_contributions = self.member_contributions.aggregate(models.Sum('amount'))
+        _total_contributions = self.member_contributions.aggregate(
+            models.Sum('amount'))
+
         return _total_contributions
+
+    @property
+    def paid_up(self):
+        today = datetime.now()
+        current_month = today.strftime("%B")
+        return self.member_contributions.filter(month=current_month).exists()
+
+    def __str__(self):
+        return f'{self.first_name}'
 
 
 class Dependant(Person):
@@ -50,4 +63,4 @@ class Dependant(Person):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.first_name}: {self.relationship}'
+        return f'{self.relationship} : {self.first_name}' # noqa

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -5,6 +7,11 @@ from members.models import Member
 
 
 class Contribution(models.Model):
+    now = datetime.now()
+    current_year = now.year
+    current_month = now.strftime("%B")
+    current_period = {'month': current_month, 'year': current_year}
+
     JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE =\
         'January', 'February', 'March', 'April', 'May', 'June'
 
@@ -28,6 +35,7 @@ class Contribution(models.Model):
     member = models.ForeignKey(
         Member, related_name='member_contributions', on_delete=models.CASCADE)
     month = models.CharField(choices=MONTHS, max_length=20)
+    year = models.PositiveIntegerField(default=current_year)
     amount = models.PositiveIntegerField(default=250)
     payment_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,12 +48,43 @@ class Contribution(models.Model):
     def total_contribution(self):
         return Contribution.objects.aggregate(models.Sum('amount'))
 
+    def total_monthly_contributions(self, month=current_month, year=current_year): # noqa
+        monthly_contribution = Contribution.objects.filter(
+            month=month, year=year).aggregate(models.Sum('amount'))
+
+        return monthly_contribution
+
+    def total_annual_contributions(self, year=current_year):
+        annual_contribution = Contribution.objects.filter(
+            year=year).aggregate(models.Sum('amount'))
+
+        return annual_contribution
+
+    def members_who_contributed(self, month, year=None):
+        if year:
+            summary = Contribution.objects.filter(
+                month=month, year=year).values_list('member', flat=True)
+
+        summary = Contribution.objects.filter(
+                month=month).values_list('member', flat=True)
+
+        return summary
+
     def available_funds(self):
         collected = self.total_contribution()
         disbursed = Disbursement.objects.aggregate(models.Sum('amount'))
 
-        return (collected.get(
-            'amount__sum', 0) - disbursed.get('amount__sum', 0))
+        collected_ = collected.get('amount__sum')
+        disbursed_ = disbursed.get('amount__sum')
+
+        if not collected_ and disbursed_:
+            available = 0 - disbursed_
+        elif not disbursed_ and collected_:
+            available = collected_ - 0
+        elif not collected_ and not disbursed_:
+            available = 0
+
+        return {'disbursed_funds': disbursed_, 'available_funds': available}
 
     def __str__(self):
         return f'{self.month}: {self.amount}'
