@@ -15,7 +15,7 @@ graphene==2.1.8
 graphene-django==2.8.0
 graphql-core==2.2.1
 graphql-relay==2.0.1
-ipython==7.11.1
+ipython==7.16.3
 ipython-genutils==0.2.0
 jedi==0.15.2
 mock==3.0.5
